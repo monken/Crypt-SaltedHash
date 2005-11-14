@@ -6,11 +6,11 @@ use Digest       ();
 
 use vars qw($VERSION);
 
-$VERSION = '0.02';
+$VERSION = '0.03';
 
 =head1 NAME
 
-Crypt::SaltedHash - Perl interface to functions that will assist in working
+Crypt::SaltedHash - Perl interface to functions that assist in working
 with salted hashes.
 
 =head1 SYNOPSIS
@@ -27,7 +27,7 @@ with salted hashes.
 =head1 DESCRIPTION
 
 The C<Crypt::SaltedHash> module provides an object oriented interface to
-create salted (or seeded) hashed of clear text data. The original
+create salted (or seeded) hashes of clear text data. The original
 formalization of this concept comes from RFC-3112 and is extended by the use
 of different digital agorithms.
 
@@ -35,29 +35,29 @@ of different digital agorithms.
 
 =head2 Setting the data
 
-The process starts with 2 elements of data: 
+The process starts with 2 elements of data:
 
 =over
 
-=item * 
+=item *
 
-a clear text string (this could represent a password for instance). 
+a clear text string (this could represent a password for instance).
 
 =item *
 
-the salt, a random seed of data. This is the value used to augment a hash in order to 
+the salt, a random seed of data. This is the value used to augment a hash in order to
 ensure that 2 hashes of identical data yield different output.
 
 =back
 
-For the purposes of this abstract we will analyze the steps within code that perform the necessary actions 
-to achieve the end resulted hash. Cryptographers call this hash a digest. We will not however go into an explanation 
-of a one-way encryption scheme. Readers of this abstract are encouraged to get information on that subject by 
+For the purposes of this abstract we will analyze the steps within code that perform the necessary actions
+to achieve the endresult hashes. Cryptographers call this hash a digest. We will not however go into an explanation
+of a one-way encryption scheme. Readers of this abstract are encouraged to get information on that subject by
 their own.
 
-Theoretically, an implementation of a one-way function as an algorithm takes input, and provides output, that are both 
-in binary form; realistically though digests are typically encoded and stored in a database or in a flat text or XML file. 
-Take slappasswd5 for instance, it performs the exact functionality described above. We will use it as a black box compiled 
+Theoretically, an implementation of a one-way function as an algorithm takes input, and provides output, that are both
+in binary form; realistically though digests are typically encoded and stored in a database or in a flat text or XML file.
+Take slappasswd5 for instance, it performs the exact functionality described above. We will use it as a black box compiled
 piece of code for our analysis.
 
 In pseudocode we generate a salted hash as follows:
@@ -66,16 +66,16 @@ In pseudocode we generate a salted hash as follows:
     Concatenate the 2 binary values
     Hash the concatenation into SaltedPasswordHash
     Base64Encode(concat(SaltedPasswordHash, Salt))
-    
-We take a clear text string and hash this into a binary object representing the hashed value of the clear text string plus the random salt. 
+
+We take a clear text string and hash this into a binary object representing the hashed value of the clear text string plus the random salt.
 Then we have the Salt value, which are typically 4 bytes of purely random binary data represented as hexadecimal notation (Base16 as 8 bytes).
 
-Using SHA-1 as the hashing algorithm, SaltedPasswordHash is of length 20 (bytes) in raw binary form 
-(40 bytes if we look at it in hex). Salt is then 4 bytes in raw binary form. The SHA-1 algorithm generates 
-a 160 bit hash string. Consider that 8 bits = 1 byte. So 160 bits = 20 bytes, which is exactly what the 
-algorithm gives us. 
+Using SHA-1 as the hashing algorithm, SaltedPasswordHash is of length 20 (bytes) in raw binary form
+(40 bytes if we look at it in hex). Salt is then 4 bytes in raw binary form. The SHA-1 algorithm generates
+a 160 bit hash string. Consider that 8 bits = 1 byte. So 160 bits = 20 bytes, which is exactly what the
+algorithm gives us.
 
-The Base64 encoded final string representation of the binary result looks like: 
+The Base64 encoding of the binary result looks like:
 
     {SSHA}B0O0XSYdsk7g9K229ZEr73Lid7HBD9DX
 
@@ -95,17 +95,17 @@ A couple of examples of salted hashes using on the same exact clear-text string:
     slappasswd -s testing123
     {SSHA}ncHs4XYmQKJqL+VuyNQzQjwRXfvu6noa
 
-4 runs of slappasswd against the same clear text string each yielded unique endresult hashes. 
+4 runs of slappasswd against the same clear text string each yielded unique endresult hashes.
 The random salt is generated silently and never made visible.
 
 =head2 Extracting the data
 
-One of the keys to note is that the salt is dealt with twice in the process. It is used once for the actual application of randomness to the 
-given clear text string, and then it is stored within the final output as purely Base64 encoded data. In order to perform an authentication 
-query for instance, we must break apart the concatenation that was created for storage of the data. We accomplish this by splitting 
+One of the keys to note is that the salt is dealt with twice in the process. It is used once for the actual application of randomness to the
+given clear text string, and then it is stored within the final output as purely Base64 encoded data. In order to perform an authentication
+query for instance, we must break apart the concatenation that was created for storage of the data. We accomplish this by splitting
 up the binary data we get after Base64 decoding the stored hash.
 
-In pseudocode we would perform the extraction and verification operations as such: 
+In pseudocode we would perform the extraction and verification operations as such:
 
     Strip the hash identifier from the Digest
     Base64Decode(Digest, 20)
@@ -116,15 +116,15 @@ In pseudocode we would perform the extraction and verification operations as suc
     Compare targetPasswordHash with pwhash
     Return corresponding Boolean value
 
-Our job is to split the original digest up into 2 distinct byte arrays, one of the left 20 (0 - 20 including the null terminator) bytes and 
-the other for the rest of the data. The left 0 – 20 bytes will represent the salted binary value we will us for a byte-by-byte data 
-match against the new clear text presented for verification. The string presented for verification will have to be salted as well. The rest 
-of the bytes (21 – 32) represent the random salt which when decoded will show the exact hex characters that make up the once randomly 
+Our job is to split the original digest up into 2 distinct byte arrays, one of the left 20 (0 - 20 including the null terminator) bytes and
+the other for the rest of the data. The left 0 – 20 bytes will represent the salted  binary value we will use for a byte-by-byte data
+match against the new clear text presented for verification. The string presented for verification will have to be salted as well. The rest
+of the bytes (21 – 32) represent the random salt which when decoded will show the exact hex characters that make up the once randomly
 generated seed.
 
-We are now ready to verify some data. Lets start with the 4 hashes presented earlier. We will run them through our code to extract the 
-random salt and then using that verify the clear text string hashed by slappasswd. First, lets do a verification test with an erroneous 
-password; this should fail the matching test: 
+We are now ready to verify some data. Let's start with the 4 hashes presented earlier. We will run them through our code to extract the
+random salt and then using that verify the clear text string hashed by slappasswd. First, let's do a verification test with an erroneous
+password; this should fail the matching test:
 
     {SSHA}72uhy5xc1AWOLwmNcXALHBSzp8xt4giL Test123
     Hash extracted (in hex): ef6ba1cb9c5cd4058e2f098d71700b1c14b3a7cc
@@ -133,7 +133,7 @@ password; this should fail the matching test:
     Hash presented in hex: 256bc48def0ce04b0af90dfd2808c42588bf9542
     Hashes DON'T match: Test123
 
-The match failure test was successful as expected. Now let’s use known valid data through the same exact code:
+The match failure test was successful as expected. Now let's use known valid data through the same exact code:
 
     {SSHA}72uhy5xc1AWOLwmNcXALHBSzp8xt4giL testing123
     Hash extracted (in hex): ef6ba1cb9c5cd4058e2f098d71700b1c14b3a7cc
@@ -141,10 +141,10 @@ The match failure test was successful as expected. Now let’s use known valid dat
     Hash length is: 20 Salt length is: 4
     Hash presented in hex: ef6ba1cb9c5cd4058e2f098d71700b1c14b3a7cc
     Hashes match: testing123
-    
-The demystification of this functionality is evident. We see that salting hashed data does indeed add another layer of security to the 
-clear text one-way hashing process. But we also see that salted hashes should also be protected just as if the data was in clear text form. 
-Now that we have seen salted hashes actually work you should also realize that in code it is possible to extract salt values and use them 
+
+The process used for salted passwords should now be clear. We see that salting hashed data does indeed add another layer of security to the
+clear text one-way hashing process. But we also see that salted hashes should also be protected just as if the data was in clear text form.
+Now that we have seen salted hashes actually work you should also realize that in code it is possible to extract salt values and use them
 for various purposes. Obviously the usage can be on either side of the colored hat line, but the data is there.
 
 =head1 METHODS
@@ -172,7 +172,7 @@ a random seed is provided for you (recommended).
 
 =item *
 
-I<salt_len>:  By default, the module assumes a salt length of 4 bytes (or 8, if it is encoded in hex). 
+I<salt_len>:  By default, the module assumes a salt length of 4 bytes (or 8, if it is encoded in hex).
 If you choose a different length, you have to tell the I<validate> function how long your seed was.
 
 =back
@@ -263,7 +263,7 @@ sub generate {
 
 =item B<validate( $hasheddata, $cleardata, [$salt_len] )>
 
-Validates a hasheddata priviously generated against cleardata. I<$salt_len> defaults to 4 if not set.
+Validates a hasheddata previously generated against cleardata. I<$salt_len> defaults to 4 if not set.
 Returns 1 if the validation is successful, 0 otherwise.
 
 =cut
@@ -326,7 +326,7 @@ sub make_scheme {
 sub make_algorithm {
 
     my $algorithm = shift;
-           
+
     if ( $algorithm =~ m!^S(.*)$! ) {
         $algorithm = $1;
         if ( $algorithm =~ m!(\w+)(\d+)! ) {
