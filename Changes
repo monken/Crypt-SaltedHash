@@ -1,6 +1,9 @@
 Revision history for Perl extension Crypt::SaltedHash.
 
+0.02  Mon Nov 14 17:54:00 2005
+    - fixed some bugs; added tests and documentation
+
 0.01  Sun Nov 13 05:41:23 2005
-	- original version; created by h2xs 1.23 with options
+    - original version; created by h2xs 1.23 with options
 		-XA -n Crypt::SaltedHash
 
