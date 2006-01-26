@@ -6,7 +6,7 @@
 # change 'tests => 1' to 'tests => last_test_to_print';
 
 use strict;
-use Test::More tests => 11;
+use Test::More tests => 6;
 BEGIN { use_ok('Crypt::SaltedHash') }
 
 #########################
@@ -15,10 +15,10 @@ my ( $csh, $salted, $valid );
 
 my %known_salts = (
     'MD5'   => '{SMD5}vfwtsKpZn1kZ5WXDKCFqUTEyMzQ=',
-    'SHA-1' => '{SSHA}kRnWqCDFvZFoV7A6cTGBdq1Xv7cxMjM0',
+    # 'SHA-1' => '{SSHA}kRnWqCDFvZFoV7A6cTGBdq1Xv7cxMjM0',
 );
 
-foreach my $alg (qw/MD5 SHA-1/) {
+foreach my $alg (keys %known_salts) {
 
     $csh = Crypt::SaltedHash->new( algorithm => $alg );
     $csh->add('secret');

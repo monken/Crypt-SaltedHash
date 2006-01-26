@@ -6,7 +6,7 @@ use Digest       ();
 
 use vars qw($VERSION);
 
-$VERSION = '0.03';
+$VERSION = '0.04';
 
 =head1 NAME
 
@@ -329,10 +329,14 @@ sub make_algorithm {
 
     if ( $algorithm =~ m!^S(.*)$! ) {
         $algorithm = $1;
-        if ( $algorithm =~ m!(\w+)(\d+)! ) {
+        # print STDERR "algorithm: $algorithm\n";
+        if ( $algorithm =~ m!([a-zA-Z]+)([0-9]+)! ) {
 
             my $name   = uc($1);
             my $digits = $2;
+
+            # print STDERR "name: $name\n";
+            # print STDERR "digits: $digits\n";
 
             $name = "HMAC-$2" if $name =~ m!^HMAC(.*)$!;    # HMAC-SHA-1
             $digits = "-$digits" unless $name =~ m!MD$!;    # MD2, MD4, MD5
