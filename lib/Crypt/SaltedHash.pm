@@ -6,7 +6,7 @@ use Digest       ();
 
 use vars qw($VERSION);
 
-$VERSION = '0.04';
+$VERSION = '0.05';
 
 =head1 NAME
 
@@ -184,7 +184,7 @@ sub new {
 
     $options{algorithm} ||= 'SHA-1';
     $options{salt_len}  ||= 4;
-    $options{salt}      ||= &generate_hex_salt( $options{salt_len} * 2 );
+    $options{salt}      ||= &__generate_hex_salt( $options{salt_len} * 2 );
 
     $options{algorithm} = uc( $options{algorithm} );
     $options{algorithm} .= '-1'
@@ -195,7 +195,7 @@ sub new {
         salt      => $options{salt},
         algorithm => $options{algorithm},
         digest    => $digest,
-        scheme    => &make_scheme( $options{algorithm} ),
+        scheme    => &__make_scheme( $options{algorithm} ),
     };
 
     return bless $self, $class;
@@ -275,10 +275,10 @@ sub validate {
     $hasheddata =~ s!^\s+!!;
     $hasheddata =~ s!\s+$!!;
 
-    my $scheme    = uc( &get_pass_scheme($hasheddata) );
-    my $algorithm = &make_algorithm($scheme);
-    my $hash      = &get_pass_hash($hasheddata);
-    my $salt      = &extract_salt( $hash, $salt_len );
+    my $scheme    = uc( &__get_pass_scheme($hasheddata) );
+    my $algorithm = &__make_algorithm($scheme);
+    my $hash      = &__get_pass_hash($hasheddata);
+    my $salt      = &__extract_salt( $hash, $salt_len );
 
     my $obj = __PACKAGE__->new(
         algorithm => $algorithm,
@@ -288,7 +288,7 @@ sub validate {
     $obj->add($cleardata);
 
     my $gen_hasheddata = $obj->generate;
-    my $gen_hash       = &get_pass_hash($gen_hasheddata);
+    my $gen_hash       = &__get_pass_hash($gen_hasheddata);
 
     return $gen_hash eq $hash;
 }
@@ -311,7 +311,7 @@ I<none yet.>
 
 =cut
 
-sub make_scheme {
+sub __make_scheme {
 
     my $scheme = shift;
 
@@ -323,7 +323,7 @@ sub make_scheme {
     return uc("S$scheme");
 }
 
-sub make_algorithm {
+sub __make_algorithm {
 
     my $algorithm = shift;
 
@@ -349,17 +349,17 @@ sub make_algorithm {
     return $algorithm;
 }
 
-sub get_pass_scheme {
+sub __get_pass_scheme {
     $_[0] =~ m/{([^}]*)/;
     return $1;
 }
 
-sub get_pass_hash {
+sub __get_pass_hash {
     $_[0] =~ m/}(.*)/;
     return $1;
 }
 
-sub generate_hex_salt {
+sub __generate_hex_salt {
 
     my @keychars = (
         "0", "1", "2", "3", "4", "5", "6", "7",
@@ -377,7 +377,7 @@ sub generate_hex_salt {
     return "HEX{$salt}";
 }
 
-sub extract_salt {
+sub __extract_salt {
 
     my ( $hash, $salt_len ) = @_;
 

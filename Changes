@@ -1,5 +1,8 @@
 Revision history for Perl extension Crypt::SaltedHash.
 
+0.05  Thu Aug 10 03:04>33 2006
+    - switched to Module::Build
+
 0.04  Thu Jan 26 04:56:56 2006
 	- algorithm recognition fixed
 

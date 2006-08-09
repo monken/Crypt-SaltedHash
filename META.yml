@@ -1,11 +1,21 @@
-# http://module-build.sourceforge.net/META-spec.html
-#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
-name:         Crypt-SaltedHash
-version:      0.04
-version_from: lib/Crypt/SaltedHash.pm
-installdirs:  site
+---
+name: Crypt-SaltedHash
+version: 0.05
+author:
+  - 'Sascha Kiefer, L<esskar@cpan.org>'
+abstract: |-
+  Perl interface to functions that assist in working
+  with salted hashes.
+license: perl
+resources:
+  license: http://dev.perl.org/licenses/
 requires:
-    Digest:                        
-
-distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.17
+  Digest: 0
+provides:
+  Crypt::SaltedHash:
+    file: lib/Crypt/SaltedHash.pm
+    version: 0.05
+generated_by: Module::Build version 0.2801
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.2.html
+  version: 1.2
